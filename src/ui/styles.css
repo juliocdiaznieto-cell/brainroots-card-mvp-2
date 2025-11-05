@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --surface: #0f172a;
+  --surface-2: #111827;
+  --brand: #22c55e;
+}
+*{ box-sizing: border-box; }
+.container{ max-width: 1200px; margin: 0 auto; padding: 16px; }
+.card{ background:white; border:1px solid rgba(15,23,42,.12); border-radius:18px; box-shadow:0 6px 18px rgba(15,23,42,.08); }
+h1{ font-family: 'Cinzel', serif; }

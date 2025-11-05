@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="65mm" height="92mm" viewBox="0 0 650 920">
+  <title>Plantillas Brainroots Card — Magenta</title>
+  <defs>
+    <clipPath id="artMask"><rect x="40" y="150" width="570" height="360" rx="20" ry="20"/></clipPath>
+    <style id="palette"><![CDATA[
+      .frame{fill: #220C2A}
+      .frame-inner{fill: #160A1F}
+      .accent{fill: #C026D3}
+      .accent-2{fill: #C026D3}
+      .label{fill: #E5E7EB;font-family:Inter,sans-serif;font-weight:700}
+      .value{fill: #F3F4F6;font-family:Inter,sans-serif;font-weight:600}
+      .body{fill: #E5E7EB;font-family:Inter,sans-serif;font-weight:600}
+      .title{fill: #FFFFFF;font-family:Cinzel,serif;font-weight:700;letter-spacing:.5px}
+      .muted{fill: #D9DEE8;font-family:Inter,sans-serif;font-weight:500}
+      .rare{fill: #FACC15;font-family:Inter,sans-serif;font-weight:700}
+      .mono{fill: #CBD5E1;font-family:"JetBrains Mono",monospace;font-weight:600}
+      .cuts{fill:none;stroke: #ef4444;stroke-dasharray:6 6;stroke-width:2;opacity:.55}
+      .guides{fill:none;stroke: #60a5fa;stroke-dasharray:4 4;stroke-width:2;opacity:.35}
+    ]]></style>
+</defs>
+  <!-- Guías opcionales -->
+  <g id="guides" style="display:none">
+    <rect x="1" y="1" width="648" height="918" class="cuts"/>
+    <rect x="30" y="30" width="590" height="860" class="guides"/>
+  </g>
+
+  <!-- Marco -->
+  <rect x="10" y="10" width="630" height="900" rx="28" ry="28" class="frame"/>
+  <rect x="22" y="22" width="606" height="876" rx="24" ry="24" class="frame-inner"/>
+
+  <!-- Encabezado tipo/rareza -->
+  <g transform="translate(40, 44)">
+    <rect x="0" y="0" width="570" height="44" rx="10" ry="10" class="accent"/>
+    <text x="12" y="30" font-size="22" class="label">{{tipo}}</text>
+    <text x="560" y="30" font-size="20" text-anchor="end" class="rare">{{rareza}}</text>
+  </g>
+
+  <!-- Título + set code -->
+  <g transform="translate(40, 100)">
+    <text x="0" y="30" font-size="34" class="title">{{nombre}}</text>
+    <text x="560" y="30" font-size="18" text-anchor="end" class="muted">{{set_code}}</text>
+  </g>
+
+  <!-- Arte con máscara y sombra -->
+  <g transform="translate(0, 0)">
+    <g clip-path="url(#artMask)">
+      <image id="arte" href="{{arte_path}}" x="40" y="150" width="570" height="360" preserveAspectRatio="xMidYMid meet"/>
+    </g>
+    <rect x="40" y="520" width="570" height="3" class="accent-2"/>
+  </g>
+
+  <!-- Etiquetas (iconos) encima de stats -->
+  <g transform="translate(40, 555)">
+    <text x="0" y="6" font-size="20" class="muted">{{iconos_text}}</text>
+  </g>
+
+  <!-- Caja inferior de stats -->
+  <g transform="translate(40, 580)">
+    <rect x="0" y="00" width="570" height="70" rx="18" ry="18" class="accent"/>
+    <g transform="translate(24, 22)">
+      <!-- ATK -->
+      <text x="0"   y="20"  font-size="22" class="label">ATK</text>
+      <text x="60"  y="20"  font-size="28" class="value">{{ataque}}</text>
+
+      <!-- DEF -->
+      <text x="150" y="20"  font-size="22" class="label">DEF</text>
+      <text x="210" y="20"  font-size="28" class="value">{{defensa}}</text>
+
+      <!-- HP -->
+      <text x="300" y="20"  font-size="22" class="label">HP</text>
+      <text x="340" y="20"  font-size="28" class="value">{{hp}}</text>
+
+      <!-- Costo -->
+      <text x="450"   y="20" font-size="18" class="muted">Costo: {{costo}}</text>
+    </g>
+  </g>
+
+  <!-- Panel de poderes + efecto -->
+  <g transform="translate(40, 665)">
+    <rect x="0" y="0" width="570" height="190" rx="16" ry="16" class="accent"/>
+    <g transform="translate(16, 22)">
+      <text x="0" y="10"  font-size="18" class="label">Poder 1:</text>
+      <text x="110" y="10" font-size="18" class="value">{{poder_1}}</text>
+      <text x="0" y="38" font-size="18" class="label">Poder 2:</text>
+      <text x="110" y="38" font-size="18" class="value">{{poder_2}}</text>
+      <text x="0" y="66" font-size="18" class="label">Especial:</text>
+      <text x="110" y="66" font-size="18" class="value">{{poder_especial}}</text>
+      <text id="effect" x="0" y="96" font-size="14" class="body">{{texto_efecto_wrapped}}</text>
+    </g>
+  </g>
+
+  <!-- Pie de autor -->
+  <g transform="translate(40, 870)">
+    <text x="0" y="10" font-size="14" class="muted">{{autor}}</text>
+  </g>
+</svg>
