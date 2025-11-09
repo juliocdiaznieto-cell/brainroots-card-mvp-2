@@ -1,5 +1,8 @@
 // src/ui/App.tsx
 import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react'
+import Header from './Header'
+import NewIdeas from './NewIdeas'
+import PrintPreview from './PrintPreview'
 import { fillTemplate, type ArtFit } from '../utils/TemplateRenderer'
 import {
   exportCurrentCardPng,
@@ -99,7 +102,7 @@ function computeIconosText(c: Partial<Card>) {
   const rz = (c.rareza || '').toString().trim()
   return [el, rz].filter(Boolean).join(' · ')
 }
-function mapCardToTemplateVars(card: Card) {
+export function mapCardToTemplateVars(card: Card) {
   const iconos = computeIconosText(card)
   return {
     ...card,
@@ -271,6 +274,7 @@ const clearCurrent = React.useCallback(() => {
   const [showGuide, setShowGuide] = useState<boolean>(() => {
     try { return localStorage.getItem(ONBOARDING_KEY) !== '1' } catch { return true }
   })
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const closeGuide = () => { try { localStorage.setItem(ONBOARDING_KEY, '1') } catch {} ; setShowGuide(false) }
 
   // Cargar plantillas embebidas (src/ui/templates)
@@ -402,9 +406,9 @@ const svg = useMemo(() => {
 
   return (
     <div className="mx-auto max-w-[1200px] p-4">
-      <br></br><h1>***** BIENVENIDO AL CREADOR DE CARTAS - USA TU IMAGINACION Y CREA TUS PROPIAS CARTAS *****</h1> <br />
+      <Header />
       {/* Topbar */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 mt-4">
         <label className="px-3 py-2 rounded-lg border bg-white hover:bg-slate-50 cursor-pointer">
           Importar CSV
           <input type="file" accept=".csv,text/csv" className="hidden"
@@ -453,15 +457,15 @@ const svg = useMemo(() => {
               <th className="p-2 w-10">#</th>
               <th className="p-2 w-14">Imagen</th>
               <th className="p-2 text-left">Nombre</th>
-              <th className="p-2">Elemento</th>
-              <th className="p-2">Rareza</th>
-              <th className="p-2 w-16 text-center">ATK</th>
+              <th className="p-2 hidden sm:table-cell">Elemento</th>
+              <th className="p-2 hidden md:table-cell">Rareza</th>
+              <th className="p-2 w-16 text-center hidden lg:table-cell">ATK</th>
               <th className="p-2 w-16 text-center hidden xl:table-cell">DEF</th>
-              <th className="p-2 w-16 text-center">HP</th>              
+              <th className="p-2 w-16 text-center hidden lg:table-cell">HP</th>
               <th className="p-2 w-16 text-center hidden xl:table-cell">Costo</th>
               {showAdvanced && <th className="p-2 hidden 2xl:table-cell">Autor</th>}
               {showAdvanced && <th className="p-2 hidden 2xl:table-cell">Efecto</th>}
-              <th className="p-2 w-24">Código</th>
+              <th className="p-2 w-24 hidden sm:table-cell">Código</th>
               <th className="p-2 w-16 text-center">Eliminar</th>
             </tr>
           </thead>
@@ -492,7 +496,7 @@ const svg = useMemo(() => {
                     />
                   </td>
 
-                  <td className="p-2">
+                  <td className="p-2 hidden sm:table-cell">
                     <select
                       className="w-full px-2 py-1 rounded border bg-white"
                       value={c.elemento || 'Tierra'}
@@ -506,7 +510,7 @@ const svg = useMemo(() => {
                     </select>
                   </td>
 
-                  <td className="p-2">
+                  <td className="p-2 hidden md:table-cell">
                     <select
                       className="w-full px-2 py-1 rounded border bg-white"
                       value={c.rareza || 'Común'}
@@ -521,7 +525,7 @@ const svg = useMemo(() => {
                   </td>
 
 
-                  <td className="p-2 text-right">
+                  <td className="p-2 text-right hidden lg:table-cell">
                     <input
                       type="number"
                       className="w-20 px-2 py-1 rounded border text-right"
@@ -539,7 +543,7 @@ const svg = useMemo(() => {
                     />
                   </td>
 
-                  <td className="p-2 text-right">
+                  <td className="p-2 text-right hidden lg:table-cell">
                     <input
                       type="number"
                       className="w-20 px-2 py-1 rounded border text-right"
@@ -575,7 +579,7 @@ const svg = useMemo(() => {
                     </td>
                   )}
 
-                  <td className="p-2">
+                  <td className="p-2 hidden sm:table-cell">
                     <input
                       className="w-full px-2 py-1 rounded border"
                       value={c.set_code || ''}
@@ -608,10 +612,10 @@ const svg = useMemo(() => {
 </section> <br />
 
       {/* Grid principal (12 cols): Listado · Vista previa · Editor+Preferencias */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* Editor + Preferencias (derecha, sticky) */}
-        <aside className="xl:col-span-7 order-2 xl:order-1">
+        <aside className="lg:col-span-7 order-2 lg:order-1">
           <div className="sticky top-4 space-y-4">
             <div className="bg-white rounded-2xl shadow-sm border p-3">
               <SectionTitle>Editar carta</SectionTitle>
@@ -652,6 +656,7 @@ const svg = useMemo(() => {
                   templates={templates}
                   onChange={(patch) => mutateCard(selected, patch)}
                   onImportSvg={onImportSvg}
+                  setTemplates={setTemplates}
                 />
               )}
 
@@ -661,7 +666,7 @@ const svg = useMemo(() => {
         </aside>
 
                 {/* Vista previa (centro) */}
-        <section className="xl:col-span-5 order-1 xl:order-2"
+        <section className="lg:col-span-5 order-1 lg:order-2"
           onDragOver={(e) => e.preventDefault()} onDrop={onDropPreview}>
           <div className="bg-white rounded-2xl shadow-sm border p-3">
             <SectionTitle>Vista previa</SectionTitle>
@@ -752,28 +757,13 @@ const svg = useMemo(() => {
               <button
                 className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) ? 'bg-emerald-600' : 'bg-slate-400 cursor-not-allowed')}
                 disabled={!cards.some((c) => c?.arte_path)}
-                onClick={() =>
-                  exportSheetPdfPerTemplate(
-                    cards.filter((c) => c.arte_path),
-                    (c) => templates.find((t) => t.id === (c as any).template_id)?.svg || currentTplSvg,
-                    'A4', dpi, scale,
-                    (c) => ((c as any).art_fit ?? 'contain') as ArtFit,
-                  )
-                }
+                onClick={() => setShowPrintPreview(true)}
               >Imprime 3×3</button>
 
               <button
                 className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) ? 'bg-emerald-700' : 'bg-slate-400 cursor-not-allowed')}
                 disabled={!cards.some((c) => c?.arte_path)}
-              onClick={() =>
-                exportSheetPdfColoring(
-                  cards.filter((c) => c.arte_path),
-                  currentTplSvg,            // ← antes era activeTemplate
-                  'A4', dpi, scale,
-                  (c) => ((c as any).art_fit ?? 'contain') as ArtFit,
-                  { high: mode === 'niño' ? 0.18 : 0.22, low: 0.12, sigma: 1.1, thicknessPx: mode === 'niño' ? 3 : 2 },
-                )
-              }
+                onClick={() => setShowPrintPreview(true)}
               >Imprime 3×3 (colorear)</button>
 
               </div>
@@ -785,6 +775,9 @@ const svg = useMemo(() => {
 
       {/* Overlay de Guía Rápida */}
       {showGuide && <QuickGuide onClose={closeGuide} />}
+      {showPrintPreview && <PrintPreview cards={cards} templates={templates} onClose={() => setShowPrintPreview(false)} dpi={dpi} scale={scale} />}
+
+      <NewIdeas />
     </div>
   )
 }
@@ -792,10 +785,12 @@ const svg = useMemo(() => {
 // ───────────────────────────────────────────────────────────────────────────────
 // Editor (con chips/stepper, sin romper tus selects y nombres de campos)
 // ───────────────────────────────────────────────────────────────────────────────
+import ColorPalette from './ColorPalette';
+
 function Editor({
-  card, mode, templates, onChange, onImportSvg,
+  card, mode, templates, onChange, onImportSvg, setTemplates
 }: {
-  card: Card; mode: 'experto' | 'niño'; templates: TemplateOpt[]; onChange: (patch: Partial<Card>) => void; onImportSvg: (file: File) => Promise<void>; 
+  card: Card; mode: 'experto' | 'niño'; templates: TemplateOpt[]; onChange: (patch: Partial<Card>) => void; onImportSvg: (file: File) => Promise<void>; setTemplates: (templates: TemplateOpt[]) => void;
 }) {
   if (!card) return null
   const set = (k: keyof Card, v: any) => onChange({ [k]: v } as any)
@@ -808,10 +803,26 @@ function Editor({
   const efectoTxt = (card as any).efecto || (card as any).texto_efecto || ''
   const efectoLen = String(efectoTxt || '').length
 
+  const handleColorSelect = (colors: { frame: string; accent: string }) => {
+    const tpl = templates.find(t => t.id === (card as any).template_id);
+    if (!tpl) return;
+
+    const newSvg = tpl.svg.replace(
+      /(<style id="palette">.*?\.frame\{fill: )[^}]+(.*?\.accent\{fill: )[^}]+(.*<\/style>)/s,
+      `$1${colors.frame}$2${colors.accent}$3`
+    );
+
+    const newTemplates = templates.map(t =>
+      t.id === (card as any).template_id ? { ...t, svg: newSvg } : t
+    );
+    setTemplates(newTemplates);
+  };
+
   return (
 
 
     <div className="grid grid-cols-1 gap-3">
+      <ColorPalette onSelect={handleColorSelect} />
       {/* Nombre / Código */}
 
     {/* Template 
