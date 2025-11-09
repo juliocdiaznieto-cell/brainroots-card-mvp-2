@@ -1,5 +1,7 @@
 // src/ui/App.tsx
 import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react'
+import ActivationModal from './ActivationModal'
+import { getLicenseStatus, setLicenseStatus, type LicenseStatus, saveLicenseKey, verifyLicenseKey } from '../utils/license'
 import { fillTemplate, type ArtFit } from '../utils/TemplateRenderer'
 import {
   exportCurrentCardPng,
@@ -195,6 +197,29 @@ export default function App() {
 
   const [mode, setMode] = useState<'experto' | 'niño'>('experto')
   const kidMode = mode === 'niño'
+
+  const [licenseStatus, setLicenseStatus] = useState<LicenseStatus>('unlicensed');
+  const [showActivationModal, setShowActivationModal] = useState(false);
+
+  useEffect(() => {
+    getLicenseStatus().then(status => {
+      setLicenseStatus(status);
+      if (status === 'unlicensed') {
+        setShowActivationModal(true);
+      }
+    });
+  }, []);
+
+  const handleActivate = async (key: string) => {
+    const isValid = await verifyLicenseKey(key);
+    if (isValid) {
+      await setLicenseStatus('licensed');
+      await saveLicenseKey(key);
+      setLicenseStatus('licensed');
+      setShowActivationModal(false);
+    }
+    return isValid;
+  };
 
   const [history, setHistory] = useState<Card[][]>([])
   const pushHistory = () => setHistory((h) => [...h, cards.map((c) => ({ ...c }))])
@@ -420,6 +445,14 @@ const svg = useMemo(() => {
         </button>
 
         <div className="ml-auto flex items-center gap-2">
+          {licenseStatus === 'unlicensed' && (
+            <button
+              className="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+              onClick={() => setShowActivationModal(true)}
+            >
+              Activate Product
+            </button>
+          )}
           <button className="px-3 py-2 rounded-lg border hover:bg-slate-50" onClick={() => setShowGuide(true)}>Ayuda & Guía</button>
 
           {/* Modo (renombrado en UI; valores internos iguales) */}
@@ -733,14 +766,16 @@ const svg = useMemo(() => {
                 </div>
 
               <button
-                className={'px-3 py-2 rounded-lg text-white ' + (hasArt ? 'bg-slate-900' : 'bg-slate-400 cursor-not-allowed')}
-                disabled={!hasArt}
+                className={'px-3 py-2 rounded-lg text-white ' + (hasArt && licenseStatus === 'licensed' ? 'bg-slate-900' : 'bg-slate-400 cursor-not-allowed')}
+                disabled={!hasArt || licenseStatus !== 'licensed'}
+                title={licenseStatus !== 'licensed' ? 'Activate to export' : ''}
                 onClick={() => current && svg && exportCurrentCardPng(svg, dpi, current, scale, ((current as any)?.art_fit ?? 'contain') as ArtFit)}
               >Carta Digital</button>
 
               <button
-                className={'px-3 py-2 rounded-lg text-white ' + (hasArt ? 'bg-slate-900/90' : 'bg-slate-400 cursor-not-allowed')}
-                disabled={!hasArt}
+                className={'px-3 py-2 rounded-lg text-white ' + (hasArt && licenseStatus === 'licensed' ? 'bg-slate-900/90' : 'bg-slate-400 cursor-not-allowed')}
+                disabled={!hasArt || licenseStatus !== 'licensed'}
+                title={licenseStatus !== 'licensed' ? 'Activate to export' : ''}
                 onClick={() =>
                   current && svg && exportCurrentCardPngColoring(
                     svg, dpi, current, scale, ((current as any)?.art_fit ?? 'contain') as ArtFit,
@@ -750,8 +785,9 @@ const svg = useMemo(() => {
               >Carta (Colorear)</button>
 
               <button
-                className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) ? 'bg-emerald-600' : 'bg-slate-400 cursor-not-allowed')}
-                disabled={!cards.some((c) => c?.arte_path)}
+                className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) && licenseStatus === 'licensed' ? 'bg-emerald-600' : 'bg-slate-400 cursor-not-allowed')}
+                disabled={!cards.some((c) => c?.arte_path) || licenseStatus !== 'licensed'}
+                title={licenseStatus !== 'licensed' ? 'Activate to print' : ''}
                 onClick={() =>
                   exportSheetPdfPerTemplate(
                     cards.filter((c) => c.arte_path),
@@ -763,17 +799,18 @@ const svg = useMemo(() => {
               >Imprime 3×3</button>
 
               <button
-                className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) ? 'bg-emerald-700' : 'bg-slate-400 cursor-not-allowed')}
-                disabled={!cards.some((c) => c?.arte_path)}
-              onClick={() =>
-                exportSheetPdfColoring(
-                  cards.filter((c) => c.arte_path),
-                  currentTplSvg,            // ← antes era activeTemplate
-                  'A4', dpi, scale,
-                  (c) => ((c as any).art_fit ?? 'contain') as ArtFit,
-                  { high: mode === 'niño' ? 0.18 : 0.22, low: 0.12, sigma: 1.1, thicknessPx: mode === 'niño' ? 3 : 2 },
-                )
-              }
+                className={'px-3 py-2 rounded-lg text-white ' + (cards.some((c) => c?.arte_path) && licenseStatus === 'licensed' ? 'bg-emerald-700' : 'bg-slate-400 cursor-not-allowed')}
+                disabled={!cards.some((c) => c?.arte_path) || licenseStatus !== 'licensed'}
+                title={licenseStatus !== 'licensed' ? 'Activate to print' : ''}
+                onClick={() =>
+                  exportSheetPdfColoring(
+                    cards.filter((c) => c.arte_path),
+                    currentTplSvg,            // ← antes era activeTemplate
+                    'A4', dpi, scale,
+                    (c) => ((c as any).art_fit ?? 'contain') as ArtFit,
+                    { high: mode === 'niño' ? 0.18 : 0.22, low: 0.12, sigma: 1.1, thicknessPx: mode === 'niño' ? 3 : 2 },
+                  )
+                }
               >Imprime 3×3 (colorear)</button>
 
               </div>
@@ -783,8 +820,14 @@ const svg = useMemo(() => {
         </section>
       </div>
 
-      {/* Overlay de Guía Rápida */}
+      {/* Overlays */}
       {showGuide && <QuickGuide onClose={closeGuide} />}
+      {showActivationModal && (
+        <ActivationModal
+          onActivate={handleActivate}
+          onClose={() => setShowActivationModal(false)}
+        />
+      )}
     </div>
   )
 }
